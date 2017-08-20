@@ -1,0 +1,7 @@
+name: AltCheck
+main: me.mario.altchecker.AltChecker
+version: 1.0
+website: http://brawl.com
+author: Mario
+depend:
+commands:
