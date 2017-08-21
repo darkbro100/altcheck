@@ -1,6 +1,9 @@
 package me.mario.altchecker;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -10,24 +13,23 @@ import org.reflections.Reflections;
 
 import lombok.Getter;
 import me.mario.altchecker.command.AltCommandManager;
-import me.mario.altchecker.util.Database;
-import me.mario.altchecker.util.DatabaseInformation;
 import me.mario.altchecker.util.StaticListener;
+import me.mario.altchecker.util.database.Database;
+import me.mario.altchecker.util.database.DatabaseInformation;
 
 @Getter
 public class AltChecker extends JavaPlugin {
 
-	/**
-	 * https://pastebin.com/mnxjyY8r (table queries)
-	 */
-
 	@Getter
 	private static AltChecker instance;
 
+	private Map<UUID, Integer> cachedPlayerIds;
+	
 	@Override
 	public void onEnable() {
 		instance = this;
-
+		cachedPlayerIds = new HashMap<>();
+		
 		saveDefaultConfig();
 
 		Database.get().setInfo(new DatabaseInformation(getConfig()));
@@ -43,6 +45,11 @@ public class AltChecker extends JavaPlugin {
 		
 		registerListeners();
 		registerCommands();
+		
+		Bukkit.getScheduler().runTaskTimer(this, () -> {
+			cachedPlayerIds.clear();
+			System.out.println("Cleared cached player counts");
+		}, 20L * 300L, 20L * 300L);
 	}
 	
 	@Override

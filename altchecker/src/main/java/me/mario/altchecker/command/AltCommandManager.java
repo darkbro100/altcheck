@@ -51,7 +51,7 @@ public class AltCommandManager implements CommandExecutor {
 		if(availableCommands.size() > 0) {
 			sender.sendMessage(ChatColor.RED + "Sub command not found! List of available commands:");
 			for(AltCommand ac : availableCommands) 
-				sender.sendMessage(ChatColor.AQUA + "/" + label + " " + ac.name());
+				sender.sendMessage(ChatColor.AQUA + ac.getHelp());
 		}
 	}
 }

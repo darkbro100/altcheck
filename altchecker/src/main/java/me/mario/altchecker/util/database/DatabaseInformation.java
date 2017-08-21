@@ -1,4 +1,4 @@
-package me.mario.altchecker.util;
+package me.mario.altchecker.util.database;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
