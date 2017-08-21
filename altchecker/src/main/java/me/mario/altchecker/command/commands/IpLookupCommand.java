@@ -1,12 +1,16 @@
 package me.mario.altchecker.command.commands;
 
-import java.util.stream.Collectors;
+import java.text.DateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.command.CommandSender;
 
 import me.mario.altchecker.command.AltCommand;
+import me.mario.altchecker.util.alts.PlayerIPInformation;
+import me.mario.altchecker.util.alts.PlayerInformation;
 import me.mario.altchecker.util.database.Database;
+import mkremins.fanciful.FancyMessage;
 import net.md_5.bungee.api.ChatColor;
 
 public class IpLookupCommand extends AltCommand {
@@ -46,9 +50,27 @@ public class IpLookupCommand extends AltCommand {
 		String ip = args[0];
 
 		sender.sendMessage(ChatColor.GOLD + "Finding players using IP: " + ChatColor.YELLOW + ip);
-		sender.sendMessage(StringUtils.join(Database.get().getPlayersUsingIp(ip).stream()
-				.map(pi -> pi.getName() + " [" + pi.getIpInfo().iterator().next().getCount() + "]")
-				.collect(Collectors.toSet()), ", "));
+		
+		Set<PlayerInformation> players = Database.get().getPlayersUsingIp(ip);
+		
+		if(players.isEmpty()) {
+			sender.sendMessage(ChatColor.DARK_GRAY + "None");
+			return;
+		}
+		
+		int i = 0;
+		FancyMessage fm = new FancyMessage("");
+		
+		for(PlayerInformation pi : players) {
+			i++;
+			PlayerIPInformation ipInfo = pi.getIpInfo().iterator().next();
+			
+			fm.then(ChatColor.GREEN + pi.getName()).tooltip(ChatColor.GOLD + "First Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.GOLD + "Last Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getLastJoin()), ChatColor.GOLD + "Count: " + ChatColor.YELLOW + ipInfo.getCount());
+			if(i <= players.size() - 1)
+				fm.then(ChatColor.RESET + ", ");
+		}
+		
+		fm.send(sender);
 	}
 
 }

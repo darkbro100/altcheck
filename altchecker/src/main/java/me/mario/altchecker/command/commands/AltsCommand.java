@@ -1,5 +1,6 @@
 package me.mario.altchecker.command.commands;
 
+import java.text.DateFormat;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import me.mario.altchecker.util.Util;
 import me.mario.altchecker.util.alts.PlayerIPInformation;
 import me.mario.altchecker.util.alts.PlayerInformation;
 import me.mario.altchecker.util.database.Database;
+import mkremins.fanciful.FancyMessage;
 import net.md_5.bungee.api.ChatColor;
 
 public class AltsCommand extends AltCommand {
@@ -65,9 +67,19 @@ public class AltsCommand extends AltCommand {
 		
 		for(PlayerIPInformation info : ips) {
 			sender.sendMessage("IP: " + info.getIp());
-			for(PlayerInformation pi : Database.get().getPlayersUsingIp(info.getIp())) {
-				sender.sendMessage(pi.getName() + " [" + pi.getIpInfo().iterator().next().getCount() + "]");
+			FancyMessage fm = new FancyMessage("");
+			int i = 0;
+			Set<PlayerInformation> players = Database.get().getPlayersUsingIp(info.getIp());
+			for(PlayerInformation pi : players) {
+				i++;
+				PlayerIPInformation ipInfo = pi.getIpInfo().iterator().next();
+				
+				fm.then(ChatColor.GREEN + pi.getName()).tooltip(ChatColor.GOLD + "First Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.GOLD + "Last Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getLastJoin()), ChatColor.GOLD + "Count: " + ChatColor.YELLOW + ipInfo.getCount());
+				if(i <= players.size() - 1)
+					fm.then(ChatColor.RESET + ", ");
 			}
+			
+			fm.send(sender);
 		}
 	}
 
