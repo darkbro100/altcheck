@@ -66,8 +66,8 @@ public class AltsCommand extends AltCommand {
 		Set<PlayerIPInformation> ips = Database.get().getLoggedIps(id).getIpInfo();
 		
 		for(PlayerIPInformation info : ips) {
-			sender.sendMessage("IP: " + info.getIp());
-			FancyMessage fm = new FancyMessage("");
+			sender.sendMessage(ChatColor.RED + "  IP: " + ChatColor.GREEN + info.getIp());
+			FancyMessage fm = new FancyMessage("    " + ChatColor.RED + "Found accounts: ");
 			int i = 0;
 			Set<PlayerInformation> players = Database.get().getPlayersUsingIp(info.getIp());
 			for(PlayerInformation pi : players) {
@@ -76,7 +76,7 @@ public class AltsCommand extends AltCommand {
 				
 				fm.then(ChatColor.GREEN + pi.getName()).tooltip(ChatColor.GOLD + "First Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.GOLD + "Last Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getLastJoin()), ChatColor.GOLD + "Count: " + ChatColor.YELLOW + ipInfo.getCount());
 				if(i <= players.size() - 1)
-					fm.then(ChatColor.RESET + ", ");
+					fm.then(ChatColor.DARK_RED + ", ");
 			}
 			
 			fm.send(sender);

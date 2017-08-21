@@ -58,7 +58,7 @@ public class IpLookupCommand extends AltCommand {
 		}
 		
 		int i = 0;
-		FancyMessage fm = new FancyMessage("");
+		FancyMessage fm = new FancyMessage("  " + ChatColor.RED + "Found Accounts: ");
 		
 		for(PlayerInformation pi : players) {
 			i++;
@@ -66,7 +66,7 @@ public class IpLookupCommand extends AltCommand {
 			
 			fm.then(ChatColor.GREEN + pi.getName()).tooltip(ChatColor.GOLD + "First Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.GOLD + "Last Join: " + ChatColor.YELLOW + DateFormat.getInstance().format(ipInfo.getLastJoin()), ChatColor.GOLD + "Count: " + ChatColor.YELLOW + ipInfo.getCount());
 			if(i <= players.size() - 1)
-				fm.then(ChatColor.RESET + ", ");
+				fm.then(ChatColor.DARK_RED + ", ");
 		}
 		
 		fm.send(sender);

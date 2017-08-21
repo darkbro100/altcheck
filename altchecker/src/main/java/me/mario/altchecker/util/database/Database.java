@@ -162,6 +162,15 @@ public class Database {
 
 		return id;
 	}
+	
+	/**
+	 * Update a players name in the database. Do this whenever they login
+	 * @param playerId Player's unique ID
+	 * @param name The name to be updated
+	 */
+	public void updatePlayerName(int playerId, String name) {
+		execute("update player set name='" + name + "' where id=" + playerId);
+	}
 
 	/**
 	 * Get player's UUID from their name
