@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.common.collect.Sets;
+
 import lombok.Setter;
 import me.mario.altchecker.AltChecker;
 import me.mario.altchecker.util.alts.PlayerIPInformation;
@@ -232,19 +234,57 @@ public class Database {
 			}
 
 			while (ips.next()) {
-				ipInfo.add(PlayerIPInformation.builder().ip(ips.getString(3)).count(ips.getInt(4))
-						.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).build());
+				ipInfo.add(buildIpObject(ips));
 			}
 			
 			builder.ipInfo(ipInfo);
 			
 			toReturn = builder.build();
+			ips.close();
+			playerInfo.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			toReturn = null;
 		}
 		
 		return toReturn;
+	}
+	
+	private PlayerIPInformation buildIpObject(ResultSet ips) {
+		try {
+			return PlayerIPInformation.builder().ip(ips.getString(3)).count(ips.getInt(4))
+					.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).build();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get the players who have used the same IP as the one specified
+	 * @param ip IP to search for
+	 * @return List of players who have logged into the IP
+	 */
+	public Set<PlayerInformation> getPlayersUsingIp(String ip) {
+		Set<PlayerInformation> players = new HashSet<>();
+		
+		ResultSet set = search("select * from player_ip where ip=?", ip);
+		
+		try {
+			while(set.next()) {
+				PlayerIPInformation info = buildIpObject(set);
+				
+				ResultSet playerInfo = search("select * from player where id=?", set.getInt(2));
+				
+				if(playerInfo.next()) 
+					players.add(PlayerInformation.builder().firstJoin(playerInfo.getTimestamp(4)).uuid(UUID.fromString(playerInfo.getString(2))).name(playerInfo.getString(3)).ipInfo(Sets.newHashSet(info)).build());
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return players;
 	}
 
 	/**

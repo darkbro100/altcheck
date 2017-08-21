@@ -49,7 +49,7 @@ public class ListCommand extends AltCommand {
 			return;
 		}
 		
-		sender.sendMessage(ChatColor.GOLD + "Loading " + args[0] + "'s information. Please wait");
+		sender.sendMessage(ChatColor.GOLD + "Loading " + ChatColor.YELLOW + args[0] + ChatColor.GOLD + "'s information. Please wait");
 		
 		int id = Database.get().getPlayerId(uuid);
 		PlayerInformation info = Database.get().getLoggedIps(id);

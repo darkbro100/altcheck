@@ -1,9 +1,15 @@
 package me.mario.altchecker.command.commands;
 
+import java.util.Set;
+import java.util.UUID;
+
 import org.bukkit.command.CommandSender;
 
 import me.mario.altchecker.command.AltCommand;
 import me.mario.altchecker.util.Util;
+import me.mario.altchecker.util.alts.PlayerIPInformation;
+import me.mario.altchecker.util.alts.PlayerInformation;
+import me.mario.altchecker.util.database.Database;
 import net.md_5.bungee.api.ChatColor;
 
 public class AltsCommand extends AltCommand {
@@ -30,7 +36,7 @@ public class AltsCommand extends AltCommand {
 
 	@Override
 	public String syntax() {
-		return "/aip alts <name|ip>";
+		return "/aip alts <name>";
 	}
 
 	@Override
@@ -39,13 +45,30 @@ public class AltsCommand extends AltCommand {
 			sender.sendMessage(ChatColor.RED + getHelp());
 			return;
 		}
+			
+		UUID uuid = Util.tryElse(() -> {
+			return UUID.fromString(args[0]);	
+		}, null, false);
 		
-		String str = args[0];
+		if(uuid == null)
+			uuid = Database.get().getUuid(args[0]);
 		
-		if(Util.isValidIPV4(str))
-			sender.sendMessage(ChatColor.YELLOW + str + " is a valid IP");
-		else
-			sender.sendMessage("using str as name/uuid instead");
+		if(uuid == null) {
+			sender.sendMessage(ChatColor.RED + args[0] + " doesn't exist or has never joined!");
+			return;
+		}
+		
+		sender.sendMessage(ChatColor.GOLD + "Loading alts for " + ChatColor.YELLOW + args[0] + ChatColor.GOLD + ". Please wait");
+		
+		int id = Database.get().getPlayerId(uuid);
+		Set<PlayerIPInformation> ips = Database.get().getLoggedIps(id).getIpInfo();
+		
+		for(PlayerIPInformation info : ips) {
+			sender.sendMessage("IP: " + info.getIp());
+			for(PlayerInformation pi : Database.get().getPlayersUsingIp(info.getIp())) {
+				sender.sendMessage(pi.getName() + " [" + pi.getIpInfo().iterator().next().getCount() + "]");
+			}
+		}
 	}
 
 	
