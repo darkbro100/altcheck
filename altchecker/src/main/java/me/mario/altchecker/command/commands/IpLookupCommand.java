@@ -1,7 +1,6 @@
 package me.mario.altchecker.command.commands;
 
 import java.text.DateFormat;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.command.CommandSender;
