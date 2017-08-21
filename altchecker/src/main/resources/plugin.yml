@@ -1,7 +1,9 @@
-name: Advanced IP Logger
+name: AIPL
 main: me.mario.altchecker.AltChecker
 version: 1.0
 website: http://brawl.com
 author: Mario
 depend:
 commands:
+  aip:
+    description: Help page for Advanced IP Logger

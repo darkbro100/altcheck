@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import lombok.Getter;
+import me.mario.altchecker.command.AltCommandManager;
 import me.mario.altchecker.util.Database;
 import me.mario.altchecker.util.DatabaseInformation;
 import me.mario.altchecker.util.StaticListener;
@@ -41,6 +42,7 @@ public class AltChecker extends JavaPlugin {
 		}
 		
 		registerListeners();
+		registerCommands();
 	}
 	
 	@Override
@@ -63,6 +65,10 @@ public class AltChecker extends JavaPlugin {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void registerCommands() {
+		getCommand("aip").setExecutor(new AltCommandManager());
 	}
 
 	private void createPlayerTable() {
