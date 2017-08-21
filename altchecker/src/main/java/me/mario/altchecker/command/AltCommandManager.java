@@ -33,7 +33,7 @@ public class AltCommandManager implements CommandExecutor {
 			return true;
 		}
 		
-		AltCommand found = subCommands.stream().filter(s -> s.name().equalsIgnoreCase(args[0]) && sender.hasPermission(s.permission())).findFirst().orElse(null);
+		AltCommand found = subCommands.stream().filter(s -> (s.name().equalsIgnoreCase(args[0]) || Arrays.asList(s.aliases()).contains(args[0].toLowerCase())) && sender.hasPermission(s.permission())).findFirst().orElse(null);
 		if(found == null)
 			sendHelp(sender, label);
 		else

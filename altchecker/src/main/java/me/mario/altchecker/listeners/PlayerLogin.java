@@ -32,7 +32,6 @@ public class PlayerLogin implements Listener {
 		}
 		
 		Database.get().updatePlayerName(id, name); //Update player's name in DB
-		
 		AltChecker.getInstance().getCachedPlayerIds().put(uuid, id); //Cache their ID in case for further use
 
 		if (!Database.get().ipExists(id, ip))
