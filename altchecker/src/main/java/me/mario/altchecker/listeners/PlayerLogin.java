@@ -31,13 +31,15 @@ public class PlayerLogin implements Listener {
 			id = Database.get().getPlayerId(uuid);
 		}
 		
-		AltChecker.getInstance().getCachedPlayerIds().put(uuid, id);
+		Database.get().updatePlayerName(id, name); //Update player's name in DB
+		
+		AltChecker.getInstance().getCachedPlayerIds().put(uuid, id); //Cache their ID in case for further use
 
 		if (!Database.get().ipExists(id, ip))
-			Database.get().insertNewIpRecord(id, ip);
+			Database.get().insertNewIpRecord(id, ip); //insert new IP record if they've never connected w/ this ip 
 		else {
 			int newCount = Database.get().getLoginCount(id, ip) + 1;
-			Database.get().incrementLoginCount(id, ip, newCount);
+			Database.get().incrementLoginCount(id, ip, newCount); //increment their login count + update last login date
 		}
 	}
 
