@@ -10,6 +10,7 @@ import me.mario.altchecker.util.Util;
 import me.mario.altchecker.util.alts.PlayerIPInformation;
 import me.mario.altchecker.util.alts.PlayerInformation;
 import me.mario.altchecker.util.database.Database;
+import mkremins.fanciful.FancyMessage;
 import net.md_5.bungee.api.ChatColor;
 
 public class ListCommand extends AltCommand {
@@ -53,15 +54,14 @@ public class ListCommand extends AltCommand {
 		int id = Database.get().getPlayerId(uuid);
 		PlayerInformation info = Database.get().getLoggedIps(id);
 		
-		sender.sendMessage(ChatColor.DARK_RED + info.getName() + "'s information (" + info.getUuid().toString() + ")");
-		sender.sendMessage(ChatColor.YELLOW + "First join date: " + ChatColor.GOLD + DateFormat.getInstance().format(info.getFirstJoin()));
+		FancyMessage fm = new FancyMessage(ChatColor.DARK_RED + info.getName() + "'s IPs");
+		fm.tooltip(ChatColor.YELLOW + "First join date: " + ChatColor.GOLD + DateFormat.getInstance().format(info.getFirstJoin()));
+		fm.send(sender);
 		
 		for(PlayerIPInformation ipInfo : info.getIpInfo()) {
-			sender.sendMessage("");
-			sender.sendMessage("IP: " + ipInfo.getIp());
-			sender.sendMessage("Login Count: " + ipInfo.getCount());
-			sender.sendMessage("First Join: " + DateFormat.getInstance().format(ipInfo.getFirstJoin()));
-			sender.sendMessage("Last Join: " + DateFormat.getInstance().format(ipInfo.getLastJoin()));
+			fm = new FancyMessage(ChatColor.GREEN + ipInfo.getIp());
+			fm.tooltip(ChatColor.YELLOW + "Login Count: " + ChatColor.GOLD + ipInfo.getCount(), ChatColor.YELLOW + "First Join: " + ChatColor.GOLD + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.YELLOW + "Last Join: " + ChatColor.GOLD + DateFormat.getInstance().format(ipInfo.getLastJoin()));
+			fm.send(sender);
 		}
 	}
 
