@@ -109,6 +109,10 @@ public class AltChecker extends JavaPlugin {
 			properties.setProperty("password", "pass");
 			properties.setProperty("jdbcUrl", "jdbc:mysql://127.0.0.1/mario");
 			properties.setProperty("driverClassName", "com.mysql.jdbc.Driver");
+			properties.setProperty("connectionTimeout", "30000");
+			properties.setProperty("idleTimeout", "300000");
+			properties.setProperty("maxLifetime", "600000");
+			properties.setProperty("maximumPoolSize", "32");
 			properties.store(new FileOutputStream(hikariFile), "HikariCP Database Information");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -120,6 +124,7 @@ public class AltChecker extends JavaPlugin {
 			Properties properties = new Properties();
 			
 			properties.load(new FileInputStream(hikariFile));
+			properties.setProperty("poolName", "AIPL_POOL");
 			HikariConfig hkC = new HikariConfig(properties);
 			HikariDataSource ds = new HikariDataSource(hkC);
 			
