@@ -54,12 +54,12 @@ public class ListCommand extends AltCommand {
 		int id = Database.get().getPlayerId(uuid);
 		PlayerInformation info = Database.get().getLoggedIps(id);
 		
-		FancyMessage fm = new FancyMessage(ChatColor.DARK_RED + info.getName() + "'s IPs");
-		fm.tooltip(ChatColor.YELLOW + "First join date: " + ChatColor.GOLD + DateFormat.getInstance().format(info.getFirstJoin()));
-		fm.send(sender);
+		sender.sendMessage(ChatColor.GRAY + "=== " + ChatColor.GREEN + info.getName() + ChatColor.GRAY + " ===");
+		sender.sendMessage(ChatColor.YELLOW + "First join date: " + ChatColor.GOLD + DateFormat.getInstance().format(info.getFirstJoin()));
+		sender.sendMessage(ChatColor.YELLOW + "Logged IPs " + ChatColor.GOLD + "(Hover for info)");
 		
 		for(PlayerIPInformation ipInfo : info.getIpInfo()) {
-			fm = new FancyMessage(ChatColor.GREEN + ipInfo.getIp());
+			FancyMessage fm = new FancyMessage("    - " + ChatColor.DARK_AQUA + ipInfo.getIp());
 			fm.tooltip(ChatColor.YELLOW + "Login Count: " + ChatColor.GOLD + ipInfo.getCount(), ChatColor.YELLOW + "First Join: " + ChatColor.GOLD + DateFormat.getInstance().format(ipInfo.getFirstJoin()), ChatColor.YELLOW + "Last Join: " + ChatColor.GOLD + DateFormat.getInstance().format(ipInfo.getLastJoin()));
 			fm.send(sender);
 		}
