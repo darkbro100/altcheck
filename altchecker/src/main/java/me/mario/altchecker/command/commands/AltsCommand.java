@@ -33,7 +33,7 @@ public class AltsCommand extends AltCommand {
 
 	@Override
 	public String description() {
-		return "Search for alts that are connected to a player or an IP";
+		return "Search for alts that are connected to a player";
 	}
 
 	@Override

@@ -1,7 +1,0 @@
-## MYSQL INFORMATION HERE. THESE ARE THE CREDENTIALS FOR YOUR DATABASE ##
-mysql-info:
-  host: 'host'
-  user: 'user'
-  password: 'pass'
-  port: 3306
-  database: 'minecraft'

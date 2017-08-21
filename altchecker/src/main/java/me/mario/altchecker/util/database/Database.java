@@ -1,7 +1,6 @@
 package me.mario.altchecker.util.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.common.collect.Sets;
+import com.zaxxer.hikari.HikariDataSource;
 
 import lombok.Setter;
 import me.mario.altchecker.AltChecker;
@@ -22,13 +22,10 @@ import me.mario.altchecker.util.alts.PlayerInformation.PlayerInformationBuilder;
 public class Database {
 
 	@Setter
-	private DatabaseInformation info;
+	private HikariDataSource dataSource;
 	private static Database instance = new Database();
 
-	private Connection connection;
-
-	private Database() {
-	}
+	private Database() { }
 
 	public static Database get() {
 		return instance;
@@ -39,30 +36,18 @@ public class Database {
 	 */
 	public Connection getConnection() {
 		try {
-			if (connection != null && !connection.isClosed())
-				return connection;
-
-			Class.forName("com.mysql.jdbc.Driver");
-			connection = DriverManager.getConnection("jdbc:mysql://" + info.getHost() + ":" + info.getPort() + "/"
-					+ info.getDatabase() + "?user=" + info.getUsername() + "&password=" + info.getPassword());
-
-			return connection;
+			return dataSource.getConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-
+	
 	/**
-	 * Close current SQL connection
+	 * Close the instance of {@link HikariDataSource}
 	 */
-	public void closeConnection() {
-		try {
-			if (connection != null && !connection.isClosed())
-				connection.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public void shutdown() {
+		dataSource.close();
 	}
 
 	/**
@@ -73,14 +58,12 @@ public class Database {
 	 */
 	public void execute(String query) {
 		try {
-			getConnection();
-			PreparedStatement statement = connection.prepareStatement(query);
+			PreparedStatement statement = getConnection().prepareStatement(query);
 			statement.executeUpdate();
 
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			closeConnection();
 		}
 	}
 
@@ -97,9 +80,7 @@ public class Database {
 		ResultSet toReturn = null;
 
 		try {
-			getConnection();
-
-			PreparedStatement statement = connection.prepareStatement(query);
+			PreparedStatement statement = getConnection().prepareStatement(query);
 
 			for (int i = 0; i < values.length; i++)
 				statement.setObject(i + 1, values[i]);
@@ -107,7 +88,6 @@ public class Database {
 			toReturn = statement.executeQuery();
 		} catch (Exception e) {
 			e.printStackTrace();
-			closeConnection();
 		}
 
 		return toReturn;
@@ -120,7 +100,7 @@ public class Database {
 	 * @param name
 	 */
 	public void insertNewPlayer(UUID uuid, String name) {
-		execute("INSERT INTO `" + info.getDatabase() + "`.`player` (`uuid`, `name`) VALUES ('" + uuid.toString()
+		execute("INSERT INTO `player` (`uuid`, `name`) VALUES ('" + uuid.toString()
 				+ "', '" + name + "');");
 	}
 

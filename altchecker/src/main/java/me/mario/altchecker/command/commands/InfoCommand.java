@@ -13,7 +13,7 @@ import me.mario.altchecker.util.database.Database;
 import mkremins.fanciful.FancyMessage;
 import net.md_5.bungee.api.ChatColor;
 
-public class ListCommand extends AltCommand {
+public class InfoCommand extends AltCommand {
 
 	@Override
 	public String name() {
@@ -27,7 +27,7 @@ public class ListCommand extends AltCommand {
 
 	@Override
 	public String permission() {
-		return "aip.list";
+		return "aip.info";
 	}
 
 	@Override
