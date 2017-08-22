@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +48,9 @@ public class AltChecker extends JavaPlugin {
 		//Establish HikariCP. Make sure everything runs fine
 		HikariDataSource dataSource = loadPropertiesFile();
 		try {
-			dataSource.getConnection();
+			Connection connection = dataSource.getConnection();
 			Bukkit.getLogger().info("Connected to database!");
+			connection.close();
 		} catch (SQLException e1) {
 			//If connection cannot be established, shut down plugin as it becomes obsolete
 			e1.printStackTrace();

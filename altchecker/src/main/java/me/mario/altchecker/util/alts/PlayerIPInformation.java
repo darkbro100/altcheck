@@ -12,5 +12,6 @@ public class PlayerIPInformation {
 	private int count;
 	private Timestamp firstJoin;
 	private Timestamp lastJoin;
+	private int id;
 	
 }

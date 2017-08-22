@@ -25,7 +25,10 @@ public class Database {
 	private HikariDataSource dataSource;
 	private static Database instance = new Database();
 
-	private Database() { }
+	private Connection currentConnection;
+
+	private Database() {
+	}
 
 	public static Database get() {
 		return instance;
@@ -36,13 +39,26 @@ public class Database {
 	 */
 	public Connection getConnection() {
 		try {
-			return dataSource.getConnection();
+			this.currentConnection = dataSource.getConnection();
+			return currentConnection;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Close our current connection
+	 */
+	public void closeCurrentConnection() {
+		try {
+			this.currentConnection.close();
+			this.currentConnection = null;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Close the instance of {@link HikariDataSource}
 	 */
@@ -61,7 +77,7 @@ public class Database {
 			PreparedStatement statement = getConnection().prepareStatement(query);
 			statement.executeUpdate();
 
-			statement.close();
+			closeCurrentConnection();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -76,21 +92,25 @@ public class Database {
 	 *            The values (mainly to prevent SQL injection)
 	 * @return The result
 	 */
-	public ResultSet search(String query, Object... values) {
-		ResultSet toReturn = null;
-
+	public <T> HashSet<T> search(String query, ResultSetConsumer<T> consumer, Object... values) {
+		HashSet<T> data = new HashSet<>();
 		try {
-			PreparedStatement statement = getConnection().prepareStatement(query);
-
+			Connection c = getConnection();
+			PreparedStatement statement = c.prepareStatement(query);
 			for (int i = 0; i < values.length; i++)
 				statement.setObject(i + 1, values[i]);
 
-			toReturn = statement.executeQuery();
-		} catch (Exception e) {
+			ResultSet set = statement.executeQuery();
+
+			while (set.next())
+				data.add(consumer.accept(set));
+		} catch (SQLException e) {
 			e.printStackTrace();
+		} finally {
+			closeCurrentConnection();
 		}
 
-		return toReturn;
+		return data;
 	}
 
 	/**
@@ -100,8 +120,7 @@ public class Database {
 	 * @param name
 	 */
 	public void insertNewPlayer(UUID uuid, String name) {
-		execute("INSERT INTO `player` (`uuid`, `name`) VALUES ('" + uuid.toString()
-				+ "', '" + name + "');");
+		execute("INSERT INTO `player` (`uuid`, `name`) VALUES ('" + uuid.toString() + "', '" + name + "');");
 	}
 
 	/**
@@ -128,25 +147,31 @@ public class Database {
 		if (AltChecker.getInstance().getCachedPlayerIds().containsKey(uuid))
 			return AltChecker.getInstance().getCachedPlayerIds().get(uuid);
 
-		Integer id = null;
 		try {
-			ResultSet set = search("select id from player where uuid=?", uuid.toString());
-			if (set.next())
-				id = set.getInt(1);
+			HashSet<Integer> ids = search("select id from player where uuid=?", (set) -> {
+				try {
+					return set.getInt(1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			} , uuid.toString());
 
-			set.close();
+			return ids.iterator().next();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return id;
 		}
 
-		return id;
+		return null;
 	}
-	
+
 	/**
 	 * Update a players name in the database. Do this whenever they login
-	 * @param playerId Player's unique ID
-	 * @param name The name to be updated
+	 * 
+	 * @param playerId
+	 *            Player's unique ID
+	 * @param name
+	 *            The name to be updated
 	 */
 	public void updatePlayerName(int playerId, String name) {
 		execute("update player set name='" + name + "' where id=" + playerId);
@@ -160,17 +185,15 @@ public class Database {
 	 * @return Their UUID
 	 */
 	public UUID getUuid(String name) {
-		UUID uuid = null;
-		try {
-			ResultSet set = search("select uuid from player where name=?", name);
-			if (set.next())
-				uuid = UUID.fromString(set.getString(1));
+		UUID uuid = search("select uuid from player where name=?", (set) -> {
+			try {
+				return UUID.fromString(set.getString(1));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-			set.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return uuid;
-		}
+			return null;
+		} , name).iterator().next();
 
 		return uuid;
 	}
@@ -185,94 +208,95 @@ public class Database {
 	 * @return # of times player has connected w/ that IP
 	 */
 	public Integer getLoginCount(int playerId, String ip) {
-		Integer count = null;
-		try {
-			ResultSet set = search("select count from player_ip where ip=? and player_id=?", ip, playerId);
-			if (set.next())
-				count = set.getInt(1);
+		Integer count = search("select count from player_ip where ip=? and player_id=?", (set) -> {
+			try {
+				return set.getInt(1);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-			set.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return count;
-		}
+			return null;
+		} , ip, playerId).iterator().next();
 
 		return count;
 	}
 
 	/**
 	 * Retrieve all Player information
-	 * @param playerId ID of player
+	 * 
+	 * @param playerId
+	 *            ID of player
 	 * @return Set containing all of their info
 	 */
 	public PlayerInformation getLoggedIps(int playerId) {
-		PlayerInformation toReturn;
-
-		ResultSet ips = search("select * from player_ip where player_id=?", playerId);
-		ResultSet playerInfo = search("select * from player where id=?", playerId);
-
-		try {
-
-			PlayerInformationBuilder builder = PlayerInformation.builder();
-			Set<PlayerIPInformation> ipInfo = new HashSet<>();
-
-			if (playerInfo.next()) {
-				builder.uuid(UUID.fromString(playerInfo.getString(2)));
-				builder.name(playerInfo.getString(3));
-				builder.firstJoin(playerInfo.getTimestamp(4));
+		HashSet<PlayerIPInformation> ipInfo = search("select * from player_ip where player_id=?", (set) -> {
+			try {
+				return buildIpObject(set);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			return null;
+		} , playerId);
 
-			while (ips.next()) {
-				ipInfo.add(buildIpObject(ips));
+		PlayerInformationBuilder info = search("select * from player where id=?", (set) -> {
+			try {
+				PlayerInformationBuilder builder = PlayerInformation.builder();
+				builder.uuid(UUID.fromString(set.getString(2)));
+				builder.name(set.getString(3));
+				builder.firstJoin(set.getTimestamp(4));
+
+				return builder;
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			builder.ipInfo(ipInfo);
-			
-			toReturn = builder.build();
-			ips.close();
-			playerInfo.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			toReturn = null;
-		}
-		
-		return toReturn;
+			return null;
+		} , playerId).iterator().next();
+
+		info.ipInfo(ipInfo);
+
+		return info.build();
 	}
-	
+
 	private PlayerIPInformation buildIpObject(ResultSet ips) {
 		try {
 			return PlayerIPInformation.builder().ip(ips.getString(3)).count(ips.getInt(4))
-					.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).build();
+					.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).id(ips.getInt(1)).build();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Get the players who have used the same IP as the one specified
-	 * @param ip IP to search for
+	 * 
+	 * @param ip
+	 *            IP to search for
 	 * @return List of players who have logged into the IP
 	 */
 	public Set<PlayerInformation> getPlayersUsingIp(String ip) {
 		Set<PlayerInformation> players = new HashSet<>();
-		
-		ResultSet set = search("select * from player_ip where ip=?", ip);
-		
-		try {
-			while(set.next()) {
-				PlayerIPInformation info = buildIpObject(set);
-				
-				ResultSet playerInfo = search("select * from player where id=?", set.getInt(2));
-				
-				if(playerInfo.next()) 
-					players.add(PlayerInformation.builder().firstJoin(playerInfo.getTimestamp(4)).uuid(UUID.fromString(playerInfo.getString(2))).name(playerInfo.getString(3)).ipInfo(Sets.newHashSet(info)).build());
-			}
-		}catch(Exception e) {
-			e.printStackTrace();
+
+		HashSet<PlayerIPInformation> info = search("select * from player_ip where ip=?", (set) -> {
+			return buildIpObject(set);
+		} , ip);
+
+		for (PlayerIPInformation ipInfo : info) {
+			HashSet<PlayerInformation> found = search("select * from player where id=?", (playerInfo) -> {
+				try {
+					return PlayerInformation.builder().firstJoin(playerInfo.getTimestamp(4))
+							.uuid(UUID.fromString(playerInfo.getString(2))).name(playerInfo.getString(3))
+							.ipInfo(Sets.newHashSet(info)).build();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return null;
+			} , ipInfo.getId());
+
+			players.addAll(found);
 		}
-		
+
 		return players;
 	}
 
@@ -304,13 +328,18 @@ public class Database {
 		boolean b = false;
 
 		try {
-			ResultSet set = search("select id from player_ip where player_id=? and ip=?", playerId, ip);
-			b = set.next();
+			HashSet<Boolean> ids = search("select id from player_ip where player_id=? and ip=?", (set) -> {
+				try {
+					return set.next();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			} , playerId, ip);
 
-			set.close();
+			return ids.iterator().next();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return b;
 		}
 
 		return b;

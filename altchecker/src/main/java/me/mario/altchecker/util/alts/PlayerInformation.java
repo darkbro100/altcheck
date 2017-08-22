@@ -14,5 +14,6 @@ public class PlayerInformation {
 	private UUID uuid;
 	private Timestamp firstJoin;
 	private Set<PlayerIPInformation> ipInfo;
+	private int id;
 	
 }
