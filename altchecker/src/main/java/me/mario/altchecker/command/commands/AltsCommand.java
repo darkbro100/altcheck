@@ -63,7 +63,8 @@ public class AltsCommand extends AltCommand {
 		sender.sendMessage(ChatColor.GOLD + "Loading alts for " + ChatColor.YELLOW + args[0] + ChatColor.GOLD + ". Please wait");
 		
 		int id = Database.get().getPlayerId(uuid);
-		Set<PlayerIPInformation> ips = Database.get().getLoggedIps(id).getIpInfo();
+		PlayerInformation pInfo = Database.get().getLoggedIps(id);
+		Set<PlayerIPInformation> ips = pInfo.getIpInfo();
 		
 		for(PlayerIPInformation info : ips) {
 			sender.sendMessage(ChatColor.RED + "  IP: " + ChatColor.GREEN + info.getIp());

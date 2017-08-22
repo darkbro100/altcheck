@@ -261,7 +261,7 @@ public class Database {
 	private PlayerIPInformation buildIpObject(ResultSet ips) {
 		try {
 			return PlayerIPInformation.builder().ip(ips.getString(3)).count(ips.getInt(4))
-					.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).id(ips.getInt(1)).build();
+					.firstJoin(ips.getTimestamp(5)).lastJoin(ips.getTimestamp(6)).id(ips.getInt(1)).playerId(ips.getInt(2)).build();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -293,7 +293,7 @@ public class Database {
 					e.printStackTrace();
 				}
 				return null;
-			} , ipInfo.getId());
+			} , ipInfo.getPlayerId());
 
 			players.addAll(found);
 		}
