@@ -157,7 +157,8 @@ public class Database {
 				return null;
 			} , uuid.toString());
 
-			return ids.iterator().next();
+			if(ids.iterator().hasNext())
+				return ids.iterator().next();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -325,24 +326,13 @@ public class Database {
 	 * @return Whether or not player has connected w/ that IP
 	 */
 	public boolean ipExists(int playerId, String ip) {
-		boolean b = false;
-
 		try {
-			HashSet<Boolean> ids = search("select id from player_ip where player_id=? and ip=?", (set) -> {
-				try {
-					return set.next();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return false;
-			} , playerId, ip);
-
-			return ids.iterator().next();
+			HashSet<Boolean> ids = search("select id from player_ip where player_id=? and ip=?", (set) -> { return true; } , playerId, ip);
+			return ids.size() > 0;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return b;
+		return false;
 	}
 
 }
