@@ -288,7 +288,7 @@ public class Database {
 				try {
 					return PlayerInformation.builder().firstJoin(playerInfo.getTimestamp(4))
 							.uuid(UUID.fromString(playerInfo.getString(2))).name(playerInfo.getString(3))
-							.ipInfo(Sets.newHashSet(info)).build();
+							.ipInfo(Sets.newHashSet(ipInfo)).build();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
