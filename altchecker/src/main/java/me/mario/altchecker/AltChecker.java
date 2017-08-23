@@ -40,6 +40,10 @@ public class AltChecker extends JavaPlugin {
 	public void onEnable() {
 		instance = this;
 		cachedPlayerIds = new HashMap<>();
+		
+		if(!getDataFolder().exists())
+			getDataFolder().mkdir();
+		
 		hikariFile = new File(getDataFolder(), "hikari.properties");
 		
 		if(!hikariFile.exists())
