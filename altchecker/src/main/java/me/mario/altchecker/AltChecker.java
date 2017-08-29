@@ -150,7 +150,9 @@ public class AltChecker extends JavaPlugin {
 				"CREATE TABLE IF NOT EXISTS `player` (   `id` INT NOT NULL AUTO_INCREMENT,  "
 				+ "`uuid` VARCHAR(40) NOT NULL, "
 				+ "`name` VARCHAR(16) NOT NULL, "
-				+ "`join_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`),  UNIQUE INDEX `id` (`id`))");
+				+ "`join_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+				+ "PRIMARY KEY (`id`),  "
+				+ "UNIQUE INDEX `id` (`id`))");
 	}
 
 	private void createPlayerIpTable() {
@@ -159,7 +161,9 @@ public class AltChecker extends JavaPlugin {
 						+ "`player_id` INT NOT NULL, "
 						+ "`ip` VARCHAR(100) NOT NULL," + " `count` INT NOT NULL, "
 						+ "`first_join` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  "
-						+ "`last_join` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`)," + "UNIQUE INDEX `id` (`id`))");
+						+ "`last_join` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " + ""
+						+ "PRIMARY KEY (`id`)," 
+						+ "UNIQUE INDEX `id` (`id`))");
 	}
 
 }
