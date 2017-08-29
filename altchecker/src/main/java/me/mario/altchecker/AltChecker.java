@@ -159,7 +159,7 @@ public class AltChecker extends JavaPlugin {
 						+ "`player_id` INT NOT NULL, "
 						+ "`ip` VARCHAR(100) NOT NULL," + " `count` INT NOT NULL, "
 						+ "`first_join` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,  "
-						+ "`last_join` TIMESTAMP NOT NULL, PRIMARY KEY (`id`)," + "UNIQUE INDEX `id` (`id`))");
+						+ "`last_join` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`)," + "UNIQUE INDEX `id` (`id`))");
 	}
 
 }
