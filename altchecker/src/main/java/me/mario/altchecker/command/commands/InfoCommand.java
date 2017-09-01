@@ -42,7 +42,9 @@ public class InfoCommand extends AltCommand {
 		}, null, false);
 		
 		if(uuid == null)
-			uuid = Database.get().getUuid(args[0]);
+			uuid = Util.tryElse(() -> {
+				return Database.get().getUuid(args[0]);
+			}, null, false);
 		
 		if(uuid == null) {
 			sender.sendMessage(ChatColor.RED + args[0] + " doesn't exist or has never joined!");
